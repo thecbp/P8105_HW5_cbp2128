@@ -27,7 +27,7 @@ tidyverse helps with the analysis, and we've changed some settings to make sure 
 
 This problem wants to assemble data from a directory of files into a tidy dataset using iteration. We'll start with a tibble below, starting with all the file names.
 
-```{r p1-initial-tibble }
+```{r p1-initial-data }
 pt_data = tibble(
   filenames = list.files(path = './data')
   )
@@ -73,3 +73,23 @@ ggplot(tidy_pt_data, aes(x = week_number, y = meas,
 The plot demonstrates that there is a clear difference in measurements between the control and experimental arms at the end of 8 weeks. At week 1, both arms are at approximately the same level, but through time, the experimental arm sees an increase that the control arm does not. 
 
 # Problem 2
+
+This problem deals with homicide data made available by the Washington Post. 
+
+```{r p2-initial-data }
+homicides = read.csv(file = "./data/homicide-data.csv") %>% 
+  mutate(city_state = paste(city, state, sep = ", "))
+```
+
+The `homicides` data has `r nrow(homicides)` rows and `r ncol(homicides)` columns. Each row consists of an ID, victim details, homicide location details, and the resulting disposition of the case. 
+
+We'll create a summary of the case dispositions below by city.
+
+```{r homicides-by-city }
+homicide_summary = homicides %>% 
+  group_by(city_state) %>% 
+  summarize(n_homicides = n(),
+            n_unsolved_homicides = sum(disposition == "Closed without arrest" | 
+                                         disposition == "Open/No arrest"))
+```
+
