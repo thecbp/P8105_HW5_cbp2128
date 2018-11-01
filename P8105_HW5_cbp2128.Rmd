@@ -89,7 +89,19 @@ We'll create a summary of the case dispositions below by city.
 homicide_summary = homicides %>% 
   group_by(city_state) %>% 
   summarize(n_homicides = n(),
-            n_unsolved_homicides = sum(disposition == "Closed without arrest" | 
-                                         disposition == "Open/No arrest"))
+            n_unsolved = sum(disposition == "Closed without arrest" | 
+                                         disposition == "Open/No arrest")) %>% 
+  ggplot(., aes(x = reorder(city_state, -n_unsolved), y = n_unsolved, color = reorder(city_state, -n_unsolved))) +
+  geom_point() +
+  labs(
+    title = "Number of unsolved homicides by city-state pairs",
+    x = "City, State",
+    y = "Number unsolved"
+  ) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 60, hjust = 1),
+        text = element_text(size = 10))
+
+homicide_summary
 ```
 
