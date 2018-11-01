@@ -90,8 +90,11 @@ homicide_summary = homicides %>%
   group_by(city_state) %>% 
   summarize(n_homicides = n(),
             n_unsolved = sum(disposition == "Closed without arrest" | 
-                                         disposition == "Open/No arrest")) %>% 
-  ggplot(., aes(x = reorder(city_state, -n_unsolved), y = n_unsolved, color = reorder(city_state, -n_unsolved))) +
+                                         disposition == "Open/No arrest"))
+
+ggplot(homicide_summary, aes(x = reorder(city_state, -n_unsolved), 
+                             y = n_unsolved, 
+                             color = reorder(city_state, -n_unsolved))) +
   geom_point() +
   labs(
     title = "Number of unsolved homicides by city-state pairs",
@@ -101,7 +104,47 @@ homicide_summary = homicides %>%
   theme(legend.position = "none", 
         axis.text.x = element_text(angle = 60, hjust = 1),
         text = element_text(size = 10))
+```
 
-homicide_summary
+# Homicide in Baltimore, MD
+
+We'll have a look at the proportion of unsolved homicides in Baltimore, Maryland before expanding statistical analyses to all cities.
+
+```{r baltimore }
+baltimore = homicide_summary %>% 
+  filter(., city_state == "Baltimore, MD")
+
+baltimore_prop_test = prop.test(baltimore$n_unsolved, baltimore$n_homicides)
+prop_tibble = broom::tidy(baltimore_prop_test)
+```
+
+The true proportion of unsolved homicide cases in Baltimore, MD is between `r prop_tibble$conf.low` and `r prop_tibble$conf.high` with 95% confidence. With this workflow in mind, we can expand it to the rest of the cities.
+
+```{r iterated-prop-test, message = FALSE }
+homicide_summary_with_stats = homicide_summary %>% 
+  mutate(prop_test = map2(.x = n_unsolved, .y = n_homicides, 
+                          function(x, y) prop.test(x, y)),
+         stats = map(prop_test, broom::tidy)) %>% 
+  unnest(stats) %>% 
+  select(city_state, estimate, conf.low, conf.high)
+```
+
+With this new tidy dataset on hand, we can now visualize these intervals along with the estimates themselves.
+
+```{r estimates-with-intervals }
+ggplot(homicide_summary_with_stats, 
+       aes(x = reorder(city_state, -estimate), 
+           y = estimate, 
+           color = reorder(city_state, -estimate))) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  labs(
+    title = "Estimated proportion of unsolved homicides by city-state",
+    x = "City, State",
+    y = "Proportion of unsolved cases\n with 95% confidence interval"
+  ) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 60, hjust = 1),
+        text = element_text(size = 10))
 ```
 
