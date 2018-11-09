@@ -148,4 +148,4 @@ ggplot(homicide_summary_with_stats,
         text = element_text(size = 10))
 ```
 
-Tulsa has only 1 homicide case and no unsolved homicides, so it has an unusual confidence interval. Chicago stands out for not only having the highest proportion of unsolved homicide and one of the smallest confidence intervals. 
+Chicago stands out for not only having the highest proportion of unsolved homicide and one of the smallest confidence intervals. 
