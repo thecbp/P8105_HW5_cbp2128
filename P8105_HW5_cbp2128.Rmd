@@ -10,7 +10,6 @@ output: github_document
 ```{r lib-imports, message = FALSE }
 library(tidyverse)
 
-
 knitr::opts_chunk$set(
   out.width = "90%"
 )
@@ -59,7 +58,7 @@ We've used `map()` to read each subject's data into a corresponding column and u
 
 Now we can plot out the data for each subject by experimental arm.
 
-```{r pt-spaghetti }
+```{r pt-spaghetti, warning = FALSE }
 ggplot(tidy_pt_data, aes(x = week_number, y = meas, 
                          group = subject_id, color = test_arm)) +
   geom_line() +
